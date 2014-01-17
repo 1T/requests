@@ -27,9 +27,14 @@ from .cookies import extract_cookies_to_jar
 from .exceptions import ConnectionError, Timeout, SSLError, ProxyError
 from .auth import _basic_auth_str
 
+DEFAULT_CERT = None
+DEFAUlT_CERT_VERIFY = True
 DEFAULT_POOLBLOCK = False
 DEFAULT_POOLSIZE = 10
 DEFAULT_RETRIES = 0
+DEFAULT_PROXIES = None
+DEFAULT_STREAM = False
+DEFAULT_TIMEOUT = None
 
 
 class BaseAdapter(object):
@@ -291,12 +296,13 @@ class HTTPAdapter(BaseAdapter):
 
         return headers
 
-    def send(self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None):
+    def send(self, request, stream=DEFAULT_STREAM, timeout=DEFAULT_TIMEOUT,
+             verify=DEFAUlT_CERT_VERIFY, cert=DEFAULT_CERT, proxies=DEFAULT_PROXIES):
         """Sends PreparedRequest object. Returns Response object.
 
         :param request: The :class:`PreparedRequest <PreparedRequest>` being sent.
         :param stream: (optional) Whether to stream the request content.
-        :param timeout: (optional) The timeout on the request.
+        :param timeout: (optional) The timeout on the request. May be ``float`` or ``urllib3.Timeout`` object.
         :param verify: (optional) Whether to verify SSL certificates.
         :param cert: (optional) Any user-provided SSL certificate to be trusted.
         :param proxies: (optional) The proxies dictionary to apply to the request.
@@ -310,10 +316,11 @@ class HTTPAdapter(BaseAdapter):
 
         chunked = not (request.body is None or 'Content-Length' in request.headers)
 
-        if stream:
-            timeout = TimeoutSauce(connect=timeout)
-        else:
-            timeout = TimeoutSauce(connect=timeout, read=timeout)
+        if not isinstance(timeout, TimeoutSauce):
+            if stream:
+                timeout = TimeoutSauce(connect=timeout)
+            else:
+                timeout = TimeoutSauce(connect=timeout, read=timeout)
 
         try:
             if not chunked:

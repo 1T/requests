@@ -319,8 +319,8 @@ class Session(SessionRedirectMixin):
             for multipart encoding upload.
         :param auth: (optional) Auth tuple or callable to enable
             Basic/Digest/Custom HTTP Auth.
-        :param timeout: (optional) Float describing the timeout of the
-            request.
+        :param timeout: (optional) The timeout on the request. May be ``float``
+            or ``urllib3.Timeout`` object.
         :param allow_redirects: (optional) Boolean. Set to True by default.
         :param proxies: (optional) Dictionary mapping protocol to the URL of
             the proxy.
