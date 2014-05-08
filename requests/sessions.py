@@ -33,7 +33,7 @@ REDIRECT_STATI = (
     codes.temporary_moved, # 307
 )
 DEFAULT_REDIRECT_LIMIT = 30
-
+DEFAULT_TIMEOUT = None
 
 def merge_setting(request_setting, session_setting, dict_class=OrderedDict):
     """
@@ -83,7 +83,7 @@ def merge_hooks(request_hooks, session_hooks, dict_class=OrderedDict):
 
 
 class SessionRedirectMixin(object):
-    def resolve_redirects(self, resp, req, stream=False, timeout=None,
+    def resolve_redirects(self, resp, req, stream=False, timeout=DEFAULT_TIMEOUT,
                           verify=True, cert=None, proxies=None):
         """Receives a Response. Returns a generator of Responses."""
 
@@ -295,7 +295,7 @@ class Session(SessionRedirectMixin):
         cookies=None,
         files=None,
         auth=None,
-        timeout=None,
+        timeout=DEFAULT_TIMEOUT,
         allow_redirects=True,
         proxies=None,
         hooks=None,
