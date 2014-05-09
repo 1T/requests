@@ -295,7 +295,7 @@ class Session(SessionRedirectMixin):
         cookies=None,
         files=None,
         auth=None,
-        timeout=DEFAULT_TIMEOUT,
+        timeout=None,
         allow_redirects=True,
         proxies=None,
         hooks=None,
@@ -331,6 +331,10 @@ class Session(SessionRedirectMixin):
         :param cert: (optional) if String, path to ssl client cert file (.pem).
             If Tuple, ('cert', 'key') pair.
         """
+
+        # use DEFAULT_TIMEOUT if not defined to None
+        if timeout is None and DEFAULT_TIMEOUT is not None:
+            timeout = DEFAULT_TIMEOUT
 
         method = builtin_str(method)
 

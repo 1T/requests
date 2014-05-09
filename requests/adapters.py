@@ -308,6 +308,10 @@ class HTTPAdapter(BaseAdapter):
         :param proxies: (optional) The proxies dictionary to apply to the request.
         """
 
+        # use DEFAULT_TIMEOUT if not defined to None
+        if timeout is None and DEFAULT_TIMEOUT is not None:
+            timeout = DEFAULT_TIMEOUT
+
         conn = self.get_connection(request.url, proxies)
 
         self.cert_verify(conn, request.url, verify, cert)
