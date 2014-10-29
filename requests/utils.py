@@ -24,10 +24,10 @@ from . import __version__
 from . import certs
 from .compat import parse_http_list as _parse_list_header
 from .compat import (quote, urlparse, bytes, str, OrderedDict, unquote, is_py2,
-                     builtin_str, getproxies, proxy_bypass)
+                     builtin_str, getproxies, proxy_bypass, urlunparse)
 from .cookies import RequestsCookieJar, cookiejar_from_dict
 from .structures import CaseInsensitiveDict
-from .exceptions import MissingSchema, InvalidURL
+from .exceptions import InvalidURL
 
 _hush_pyflakes = (RequestsCookieJar,)
 
@@ -61,7 +61,7 @@ def super_len(o):
             return os.fstat(fileno).st_size
 
     if hasattr(o, 'getvalue'):
-        # e.g. BytesIO, cStringIO.StringI
+        # e.g. BytesIO, cStringIO.StringIO
         return len(o.getvalue())
 
 
@@ -351,10 +351,7 @@ def get_unicode_from_response(r):
     Tried:
 
     1. charset from content-type
-
-    2. every encodings from ``<meta ... charset=XXX>``
-
-    3. fall back and replace all unicode characters
+    2. fall back and replace all unicode characters
 
     """
 
@@ -466,9 +463,10 @@ def is_valid_cidr(string_network):
     return True
 
 
-def get_environ_proxies(url):
-    """Return a dict of environment proxies."""
-
+def should_bypass_proxies(url):
+    """
+    Returns whether we should bypass proxies or not.
+    """
     get_proxy = lambda k: os.environ.get(k) or os.environ.get(k.upper())
 
     # First check whether no_proxy is defined. If it is, check that the URL
@@ -486,13 +484,13 @@ def get_environ_proxies(url):
             for proxy_ip in no_proxy:
                 if is_valid_cidr(proxy_ip):
                     if address_in_network(ip, proxy_ip):
-                        return {}
+                        return True
         else:
             for host in no_proxy:
                 if netloc.endswith(host) or netloc.split(':')[0].endswith(host):
                     # The URL does match something in no_proxy, so we don't want
                     # to apply the proxies on this URL.
-                    return {}
+                    return True
 
     # If the system proxy settings indicate that this URL should be bypassed,
     # don't proxy.
@@ -506,12 +504,16 @@ def get_environ_proxies(url):
         bypass = False
 
     if bypass:
-        return {}
+        return True
 
-    # If we get here, we either didn't have no_proxy set or we're not going
-    # anywhere that no_proxy applies to, and the system settings don't require
-    # bypassing the proxy for the current URL.
-    return getproxies()
+    return False
+
+def get_environ_proxies(url):
+    """Return a dict of environment proxies."""
+    if should_bypass_proxies(url):
+        return {}
+    else:
+        return getproxies()
 
 
 def default_user_agent(name="python-requests"):
@@ -548,8 +550,9 @@ def default_user_agent(name="python-requests"):
 def default_headers():
     return CaseInsensitiveDict({
         'User-Agent': default_user_agent(),
-        'Accept-Encoding': ', '.join(('gzip', 'deflate', 'compress')),
-        'Accept': '*/*'
+        'Accept-Encoding': ', '.join(('gzip', 'deflate')),
+        'Accept': '*/*',
+        'Connection': 'keep-alive',
     })
 
 
@@ -564,7 +567,7 @@ def parse_header_links(value):
 
     replace_chars = " '\""
 
-    for val in value.split(","):
+    for val in re.split(", *<", value):
         try:
             url, params = val.split(";", 1)
         except ValueError:
@@ -622,13 +625,18 @@ def guess_json_utf(data):
     return None
 
 
-def except_on_missing_scheme(url):
-    """Given a URL, raise a MissingSchema exception if the scheme is missing.
-    """
-    scheme, netloc, path, params, query, fragment = urlparse(url)
+def prepend_scheme_if_needed(url, new_scheme):
+    '''Given a URL that may or may not have a scheme, prepend the given scheme.
+    Does not replace a present scheme with the one provided as an argument.'''
+    scheme, netloc, path, params, query, fragment = urlparse(url, new_scheme)
 
-    if not scheme:
-        raise MissingSchema('Proxy URLs must have explicit schemes.')
+    # urlparse is a finicky beast, and sometimes decides that there isn't a
+    # netloc present. Assume that it's being over-cautious, and switch netloc
+    # and path if urlparse decided there was no netloc.
+    if not netloc:
+        netloc, path = path, netloc
+
+    return urlunparse((scheme, netloc, path, params, query, fragment))
 
 
 def get_auth_from_url(url):
@@ -661,3 +669,18 @@ def to_native_string(string, encoding='ascii'):
             out = string.decode(encoding)
 
     return out
+
+
+def urldefragauth(url):
+    """
+    Given a url remove the fragment and the authentication part
+    """
+    scheme, netloc, path, params, query, fragment = urlparse(url)
+
+    # see func:`prepend_scheme_if_needed`
+    if not netloc:
+        netloc, path = path, netloc
+
+    netloc = netloc.rsplit('@', 1)[-1]
+
+    return urlunparse((scheme, netloc, path, params, query, ''))
