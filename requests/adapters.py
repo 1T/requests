@@ -354,6 +354,8 @@ class HTTPAdapter(BaseAdapter):
                        "timeout tuple, or a single float to set "
                        "both timeouts to the same value".format(timeout))
                 raise ValueError(err)
+        elif isinstance(timeout, TimeoutSauce):
+            pass
         else:
             timeout = TimeoutSauce(connect=timeout, read=timeout)
 
