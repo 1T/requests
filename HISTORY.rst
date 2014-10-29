@@ -3,6 +3,99 @@
 Release History
 ---------------
 
+2.4.3 (2014-10-06)
+++++++++++++++++++
+
+**Bugfixes**
+
+- Unicode URL improvements for Python 2.
+- Re-order JSON param for backwards compat.
+- Automatically defrag authentication schemes from host/pass URIs. (`#2249 <https://github.com/kennethreitz/requests/issues/2249>`_)
+
+
+2.4.2 (2014-10-05)
+++++++++++++++++++
+
+**Improvements**
+
+- FINALLY! Add json parameter for uploads! (`#2258 <https://github.com/kennethreitz/requests/pull/2258>`_)
+- Support for bytestring URLs on Python 3.x (`#2238 <https://github.com/kennethreitz/requests/pull/2238>`_)
+
+**Bugfixes**
+
+- Avoid getting stuck in a loop (`#2244 <https://github.com/kennethreitz/requests/pull/2244>`_)
+- Multiple calls to iter* fail with unhelpful error. (`#2240 <https://github.com/kennethreitz/requests/issues/2240>`_, `#2241 <https://github.com/kennethreitz/requests/issues/2241>`_)
+
+**Documentation**
+
+- Correct redirection introduction (`#2245 <https://github.com/kennethreitz/requests/pull/2245/>`_)
+- Added example of how to send multiple files in one request. (`#2227 <https://github.com/kennethreitz/requests/pull/2227/>`_)
+- Clarify how to pass a custom set of CAs (`#2248 <https://github.com/kennethreitz/requests/pull/2248/>`_)
+
+
+
+2.4.1 (2014-09-09)
+++++++++++++++++++
+
+- Now has a "security" package extras set, ``$ pip install requests[security]``
+- Requests will now use Certifi if it is available.
+- Capture and re-raise urllib3 ProtocolError
+- Bugfix for responses that attempt to redirect to themselves forever (wtf?).
+
+
+2.4.0 (2014-08-29)
+++++++++++++++++++
+
+**Behavioral Changes**
+
+- ``Connection: keep-alive`` header is now sent automatically.
+
+**Improvements**
+
+- Support for connect timeouts! Timeout now accepts a tuple (connect, read) which is used to set individual connect and read timeouts.
+- Allow copying of PreparedRequests without headers/cookies.
+- Updated bundled urllib3 version.
+- Refactored settings loading from environment — new `Session.merge_environment_settings`.
+- Handle socket errors in iter_content.
+
+
+2.3.0 (2014-05-16)
+++++++++++++++++++
+
+**API Changes**
+
+- New ``Response`` property ``is_redirect``, which is true when the
+  library could have processed this response as a redirection (whether
+  or not it actually did).
+- The ``timeout`` parameter now affects requests with both ``stream=True`` and
+  ``stream=False`` equally.
+- The change in v2.0.0 to mandate explicit proxy schemes has been reverted.
+  Proxy schemes now default to ``http://``.
+- The ``CaseInsensitiveDict`` used for HTTP headers now behaves like a normal
+  dictionary when references as string or viewed in the interpreter.
+
+**Bugfixes**
+
+- No longer expose Authorization or Proxy-Authorization headers on redirect.
+  Fix CVE-2014-1829 and CVE-2014-1830 respectively.
+- Authorization is re-evaluated each redirect.
+- On redirect, pass url as native strings.
+- Fall-back to autodetected encoding for JSON when Unicode detection fails.
+- Headers set to ``None`` on the ``Session`` are now correctly not sent.
+- Correctly honor ``decode_unicode`` even if it wasn't used earlier in the same
+  response.
+- Stop advertising ``compress`` as a supported Content-Encoding.
+- The ``Response.history`` parameter is now always a list.
+- Many, many ``urllib3`` bugfixes.
+
+2.2.1 (2014-01-23)
+++++++++++++++++++
+
+**Bugfixes**
+
+- Fixes incorrect parsing of proxy credentials that contain a literal or encoded '#' character.
+- Assorted urllib3 fixes.
+
 2.2.0 (2014-01-09)
 ++++++++++++++++++
 
@@ -14,7 +107,7 @@ Release History
 **Bugfixes**
 
 - Avoid many many exceptions from the buggy implementation of ``proxy_bypass`` on OS X in Python 2.6.
-- Avoid crashing when attempting to get authentication credentions from ~/.netrc when running as a user without a home directory.
+- Avoid crashing when attempting to get authentication credentials from ~/.netrc when running as a user without a home directory.
 - Use the correct pool size for pools of connections to proxies.
 - Fix iteration of ``CookieJar`` objects.
 - Ensure that cookies are persisted over redirect.
@@ -120,6 +213,8 @@ Release History
 1.2.1 (2013-05-20)
 ++++++++++++++++++
 
+- 301 and 302 redirects now change the verb to GET for all verbs, not just
+  POST, improving browser compatibility.
 - Python 3.3.2 compatibility
 - Always percent-encode location headers
 - Fix connection adapter matching to be most-specific first
