@@ -23,7 +23,7 @@ from .exceptions import (
     TooManyRedirects, InvalidSchema, ChunkedEncodingError, ContentDecodingError)
 from .structures import CaseInsensitiveDict
 
-from .adapters import HTTPAdapter
+from .adapters import HTTPAdapter, DEFAULT_TIMEOUT
 
 from .utils import (
     requote_uri, get_environ_proxies, get_netrc_auth, should_bypass_proxies,
@@ -31,21 +31,9 @@ from .utils import (
 )
 
 from .status_codes import codes
-<<<<<<< HEAD
-REDIRECT_STATI = (
-    codes.moved, # 301
-    codes.found, # 302
-    codes.other, # 303
-    codes.temporary_moved, # 307
-)
-DEFAULT_REDIRECT_LIMIT = 30
-DEFAULT_TIMEOUT = None
-=======
 
 # formerly defined here, reexposed here for backward compatibility
 from .models import REDIRECT_STATI
-
->>>>>>> 091991be0da19de9108dbe5e3752917fea3d7fdc
 
 def merge_setting(request_setting, session_setting, dict_class=OrderedDict):
     """
@@ -420,18 +408,12 @@ class Session(SessionRedirectMixin):
             for multipart encoding upload.
         :param auth: (optional) Auth tuple or callable to enable
             Basic/Digest/Custom HTTP Auth.
-<<<<<<< HEAD
-        :param timeout: (optional) The timeout on the request. May be ``float``
-            or ``urllib3.Timeout`` object.
-        :param allow_redirects: (optional) Boolean. Set to True by default.
-=======
         :param timeout: (optional) How long to wait for the server to send
             data before giving up, as a float, or a (`connect timeout, read
             timeout <user/advanced.html#timeouts>`_) tuple.
         :type timeout: float or tuple
         :param allow_redirects: (optional) Set to True by default.
         :type allow_redirects: bool
->>>>>>> 091991be0da19de9108dbe5e3752917fea3d7fdc
         :param proxies: (optional) Dictionary mapping protocol to the URL of
             the proxy.
         :param stream: (optional) whether to immediately download the response
