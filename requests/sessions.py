@@ -13,7 +13,7 @@ from collections import Mapping
 from datetime import datetime
 
 from .auth import _basic_auth_str
-from .compat import cookielib, OrderedDict, urljoin, urlparse, builtin_str
+from .compat import cookielib, OrderedDict, urljoin, urlparse
 from .cookies import (
     cookiejar_from_dict, extract_cookies_to_jar, RequestsCookieJar, merge_cookies)
 from .models import Request, PreparedRequest, DEFAULT_REDIRECT_LIMIT
@@ -21,6 +21,7 @@ from .hooks import default_hooks, dispatch_hook
 from .utils import to_key_val_list, default_headers, to_native_string
 from .exceptions import (
     TooManyRedirects, InvalidSchema, ChunkedEncodingError, ContentDecodingError)
+from .packages.urllib3._collections import RecentlyUsedContainer
 from .structures import CaseInsensitiveDict
 
 from .adapters import HTTPAdapter, DEFAULT_TIMEOUT
@@ -326,7 +327,8 @@ class Session(SessionRedirectMixin):
         self.mount('https://', HTTPAdapter())
         self.mount('http://', HTTPAdapter())
 
-        self.redirect_cache = {}
+        # Only store 1000 redirects to prevent using infinite memory
+        self.redirect_cache = RecentlyUsedContainer(1000)
 
     def __enter__(self):
         return self
@@ -424,11 +426,11 @@ class Session(SessionRedirectMixin):
             If Tuple, ('cert', 'key') pair.
         """
 
+        method = to_native_string(method)
+
         # use DEFAULT_TIMEOUT if not defined to None
         if timeout is None and DEFAULT_TIMEOUT is not None:
             timeout = DEFAULT_TIMEOUT
-
-        method = builtin_str(method)
 
         # Create the Request.
         req = Request(
