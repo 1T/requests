@@ -22,3 +22,6 @@ t.py
 
 t2.py
 dist
+*.class
+*~
+.DS_Store
