@@ -3,10 +3,7 @@ Requests: HTTP for Humans
 
 .. image:: https://img.shields.io/pypi/v/requests.svg
     :target: https://pypi.python.org/pypi/requests
-
-.. image:: https://img.shields.io/pypi/dm/requests.svg
-        :target: https://pypi.python.org/pypi/requests
-
+    
 Requests is the only *Non-GMO* HTTP library for Python, safe for human
 consumption.
 
@@ -31,6 +28,10 @@ Behold, the power of Requests:
     {u'disk_usage': 368627, u'private_gists': 484, ...}
 
 See `the similar code, sans Requests <https://gist.github.com/973705>`_.
+
+.. image:: http://docs.python-requests.org/en/master/_static/requests-sidebar.png
+    :target: http://docs.python-requests.org/
+
 
 Requests allows you to send *organic, grass-fed* HTTP/1.1 requests, without the
 need for manual labor. There's no need to manually add query strings to your
@@ -64,7 +65,7 @@ Requests is ready for today's web.
 - Chunked Requests
 - Thread-safety
 
-Requests supports Python 2.6 — 3.5, and runs great on PyPy.
+Requests officially supports Python 2.6–2.7 & 3.3–3.5, and runs great on PyPy.
 
 Installation
 ------------

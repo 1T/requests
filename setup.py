@@ -37,11 +37,13 @@ packages = [
     'requests',
     'requests.packages',
     'requests.packages.chardet',
+    'requests.packages.idna',
     'requests.packages.urllib3',
     'requests.packages.urllib3.packages',
     'requests.packages.urllib3.contrib',
     'requests.packages.urllib3.util',
     'requests.packages.urllib3.packages.ssl_match_hostname',
+    'requests.packages.urllib3.packages.backports',
 ]
 
 requires = []
@@ -92,6 +94,8 @@ setup(
     cmdclass={'test': PyTest},
     tests_require=test_requirements,
     extras_require={
-        'security': ['pyOpenSSL>=0.13', 'ndg-httpsclient', 'pyasn1'],
+        'security': ['pyOpenSSL>=0.14', 'cryptography>=1.3.4', 'idna>=2.0.0'],
+        'socks': ['PySocks>=1.5.6, !=1.5.7'],
     },
 )
+
